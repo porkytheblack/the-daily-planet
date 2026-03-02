@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "glove": {
+      "source": "porkytheblack/glove",
+      "sourceType": "github",
+      "computedHash": "9b49bb24a5c4f5b78aa774a36707a1c59c2060c9d8e6167545d14324bdf11b0c"
+    },
+    "station": {
+      "source": "porkytheblack/station",
+      "sourceType": "github",
+      "computedHash": "20cef99938e62be407a0f511c1f1da7a958420089d1a7a0e21543c75d5429ad8"
+    }
+  }
+}

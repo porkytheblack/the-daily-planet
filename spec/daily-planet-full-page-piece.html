@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Daily Planet — Full Page Piece</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rust: #8B5A2B;
+    --rust-light: #A0622D;
+    --rust-pale: #C4834A;
+    --patina: #4A6741;
+    --patina-light: #5C7C52;
+    --patina-pale: #6B9962;
+    --concrete: #F4F1EC;
+    --concrete-dark: #E8E4DC;
+    --concrete-mid: #D4CEBF;
+    --charcoal: #1C1C1E;
+    --charcoal-mid: #2C2C2E;
+    --wire: #3A3A3C;
+    --muted: #8A8A8E;
+    --muted-light: #AEAEB2;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--concrete);
+    color: var(--charcoal);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 300;
+  }
+
+  /* GRAIN */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.3;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* ── READING PROGRESS ── */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--rust);
+    z-index: 1000;
+    transition: width 0.1s linear;
+  }
+
+  /* ── STICKY NAV ── */
+  .sticky-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(244,241,236,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(139,90,43,0.08);
+    padding: 0 3rem;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transform: translateY(-100%);
+    transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+
+  .sticky-nav.visible {
+    transform: translateY(0);
+  }
+
+  .sticky-brand {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .sticky-brand::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--patina-pale);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(107,153,98,0.4); }
+    50% { opacity:0.6; box-shadow: 0 0 0 4px rgba(107,153,98,0); }
+  }
+
+  .sticky-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 0.9rem;
+    color: var(--charcoal);
+    max-width: 400px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sticky-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    background: var(--charcoal);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(28,28,30,0.3) 0%, rgba(28,28,30,0.1) 40%, rgba(28,28,30,0.85) 75%, rgba(28,28,30,1) 100%);
+    z-index: 1;
+  }
+
+  /* Abstract background pattern suggesting lattice/infrastructure */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    background-image:
+      linear-gradient(0deg, transparent 24%, rgba(139,90,43,0.3) 25%, rgba(139,90,43,0.3) 26%, transparent 27%),
+      linear-gradient(90deg, transparent 24%, rgba(139,90,43,0.3) 25%, rgba(139,90,43,0.3) 26%, transparent 27%);
+    background-size: 80px 80px;
+  }
+
+  .hero-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 3rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-brand {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.25);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .hero-brand::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--patina-pale);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .hero-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.2);
+  }
+
+  .hero-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 3rem 5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-category {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .hero-category::before {
+    content: '';
+    width: 2.5rem;
+    height: 1px;
+    background: var(--rust);
+  }
+
+  .hero-headline {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--concrete);
+    margin-bottom: 2rem;
+    max-width: 18ch;
+    letter-spacing: -0.01em;
+  }
+
+  .hero-headline em {
+    font-style: italic;
+    color: var(--rust-pale);
+  }
+
+  .hero-deck {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: rgba(244,241,236,0.5);
+    font-weight: 300;
+    max-width: 48ch;
+    margin-bottom: 3rem;
+  }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(244,241,236,0.06);
+  }
+
+  .hero-writer {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .hero-writer-avatar {
+    width: 32px;
+    height: 32px;
+    background: rgba(244,241,236,0.06);
+    border: 1px solid rgba(244,241,236,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: rgba(244,241,236,0.35);
+  }
+
+  .hero-writer-info {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: rgba(244,241,236,0.3);
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+  }
+
+  .hero-writer-info strong {
+    color: rgba(244,241,236,0.6);
+    font-weight: 500;
+    display: block;
+  }
+
+  .hero-meta-item {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: rgba(244,241,236,0.2);
+    letter-spacing: 0.08em;
+  }
+
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    right: 3rem;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .hero-scroll-hint span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.15);
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(180deg, rgba(139,90,43,0.4), transparent);
+    animation: scroll-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scroll-pulse {
+    0%,100% { opacity: 1; transform: scaleY(1); }
+    50% { opacity: 0.4; transform: scaleY(0.6); transform-origin: top; }
+  }
+
+  /* ── ARTICLE BODY ── */
+  .article-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 3rem;
+  }
+
+  /* Section intro strip */
+  .section-strip {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    gap: 0;
+    background: var(--concrete);
+    border-bottom: 1px solid rgba(139,90,43,0.12);
+  }
+
+  .strip-divider {
+    background: rgba(139,90,43,0.12);
+  }
+
+  .strip-cell {
+    padding: 2rem 2rem;
+  }
+
+  .strip-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 0.4rem;
+  }
+
+  .strip-value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.8rem;
+    color: var(--charcoal);
+    line-height: 1;
+  }
+
+  .strip-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    letter-spacing: 0.03em;
+  }
+
+  /* Prose sections */
+  .prose-section {
+    padding: 4rem 0;
+    display: grid;
+    grid-template-columns: 180px 1fr 260px;
+    gap: 3rem;
+  }
+
+  .prose-section-marker {
+    text-align: right;
+    padding-top: 0.3rem;
+  }
+
+  .section-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 3rem;
+    color: rgba(139,90,43,0.1);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rust);
+    line-height: 1.6;
+  }
+
+  .prose-main {
+    max-width: 580px;
+  }
+
+  .prose-main h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    font-weight: 400;
+    line-height: 1.12;
+    color: var(--charcoal);
+    margin-bottom: 1.75rem;
+  }
+
+  .prose-main h2 em {
+    font-style: italic;
+    color: var(--rust-light);
+  }
+
+  .prose-main h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: var(--charcoal);
+    margin: 2.5rem 0 1rem;
+  }
+
+  .prose-main p {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    line-height: 1.82;
+    color: var(--wire);
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+
+  .prose-main p.drop-cap::first-letter {
+    font-family: 'Instrument Serif', serif;
+    font-size: 5rem;
+    float: left;
+    line-height: 0.72;
+    margin-right: 0.6rem;
+    margin-top: 0.25rem;
+    color: var(--rust);
+  }
+
+  .prose-main p strong {
+    font-weight: 500;
+    color: var(--charcoal);
+  }
+
+  /* Annotations column */
+  .prose-annotations {
+    padding-top: 0.3rem;
+  }
+
+  .annotation {
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    background: rgba(139,90,43,0.03);
+    border-left: 2px solid rgba(139,90,43,0.15);
+  }
+
+  .annotation-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 0.5rem;
+  }
+
+  .annotation-body {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .annotation-body strong {
+    font-weight: 400;
+    color: var(--wire);
+  }
+
+  /* ── INLINE FIGURE ── */
+  .inline-figure {
+    margin: 2.5rem 0;
+    padding: 2rem;
+    background: var(--charcoal);
+    position: relative;
+  }
+
+  .figure-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+    margin-bottom: 1.25rem;
+  }
+
+  .figure-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.25rem;
+    color: var(--concrete);
+    margin-bottom: 1.5rem;
+  }
+
+  /* Mini bar chart */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 120px;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(244,241,236,0.06);
+    margin-bottom: 1rem;
+  }
+
+  .bar-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .bar {
+    width: 100%;
+    max-width: 40px;
+    border-radius: 0;
+    transition: height 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+
+  .bar-open { background: var(--rust-pale); }
+  .bar-closed { background: rgba(244,241,236,0.1); }
+
+  .bar-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.5rem;
+    color: rgba(244,241,236,0.25);
+    letter-spacing: 0.08em;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: rgba(244,241,236,0.3);
+    letter-spacing: 0.05em;
+  }
+
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+  }
+
+  .figure-caption {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: rgba(244,241,236,0.2);
+    margin-top: 1rem;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+  }
+
+  /* ── PULL QUOTE (full-bleed) ── */
+  .pull-quote-section {
+    background: var(--charcoal);
+    padding: 5rem 3rem;
+    margin: 0 -3rem;
+    position: relative;
+  }
+
+  .pull-quote-section::before {
+    content: '"';
+    position: absolute;
+    top: 2rem;
+    left: 3rem;
+    font-family: 'Instrument Serif', serif;
+    font-size: 8rem;
+    color: rgba(139,90,43,0.1);
+    line-height: 1;
+  }
+
+  .pull-quote-inner {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .pull-quote-text {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-style: italic;
+    color: var(--concrete);
+    line-height: 1.35;
+    margin-bottom: 1.5rem;
+  }
+
+  .pull-quote-text em {
+    color: var(--rust-pale);
+  }
+
+  .pull-quote-cite {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.25);
+  }
+
+  .pull-quote-context {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: rgba(244,241,236,0.15);
+    margin-top: 0.35rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139,90,43,0.2) 20%, rgba(139,90,43,0.2) 80%, transparent);
+  }
+
+  /* ── INLINE DATA ROW ── */
+  .data-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5px;
+    background: rgba(139,90,43,0.12);
+    margin: 2.5rem 0;
+  }
+
+  .data-cell {
+    background: var(--concrete);
+    padding: 1.5rem;
+  }
+
+  .data-cell-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 0.5rem;
+  }
+
+  .data-cell-value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2rem;
+    color: var(--charcoal);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .data-cell-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  /* ── INLINE IMAGE PLACEHOLDER ── */
+  .inline-image {
+    margin: 2.5rem 0;
+    background: var(--charcoal-mid);
+    height: 320px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .inline-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(139,90,43,0.1) 0%, transparent 50%);
+  }
+
+  .inline-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--rust);
+  }
+
+  .image-caption {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    margin-top: 0.75rem;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+
+  .image-credit {
+    color: var(--muted-light);
+  }
+
+  /* ── SOURCES SECTION ── */
+  .sources-section {
+    padding: 3rem 0;
+    border-top: 2px solid var(--charcoal);
+  }
+
+  .sources-header {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 1.5rem;
+  }
+
+  .sources-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5px;
+    background: rgba(139,90,43,0.1);
+  }
+
+  .source-card {
+    background: var(--concrete);
+    padding: 1.25rem;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .source-check {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--patina-pale);
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .source-info {
+    flex: 1;
+  }
+
+  .source-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--wire);
+    letter-spacing: 0.03em;
+    margin-bottom: 0.2rem;
+  }
+
+  .source-detail {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  /* ── WRITER BIO ── */
+  .writer-bio {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 1.25rem;
+    padding: 2rem;
+    background: var(--charcoal);
+    margin: 3rem 0;
+  }
+
+  .bio-avatar {
+    width: 48px;
+    height: 48px;
+    background: rgba(244,241,236,0.05);
+    border: 1px solid rgba(244,241,236,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: rgba(244,241,236,0.3);
+  }
+
+  .bio-content {}
+
+  .bio-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+    margin-bottom: 0.4rem;
+  }
+
+  .bio-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.15rem;
+    color: var(--concrete);
+    margin-bottom: 0.5rem;
+  }
+
+  .bio-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: rgba(244,241,236,0.35);
+    font-weight: 300;
+  }
+
+  .bio-style-tag {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    background: rgba(244,241,236,0.04);
+    border: 1px solid rgba(244,241,236,0.06);
+    color: rgba(244,241,236,0.2);
+  }
+
+  /* ── NEXT STORY PROMO ── */
+  .next-story-promo {
+    background: var(--charcoal);
+    border-top: 2px solid var(--rust);
+    padding: 4rem 3rem;
+  }
+
+  .next-promo-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .promo-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+    margin-bottom: 1rem;
+  }
+
+  .promo-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--concrete);
+    margin-bottom: 1rem;
+  }
+
+  .promo-title em {
+    font-style: italic;
+    color: var(--rust-pale);
+  }
+
+  .promo-excerpt {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: rgba(244,241,236,0.35);
+    font-weight: 300;
+  }
+
+  .promo-image {
+    height: 280px;
+    background: var(--charcoal-mid);
+    position: relative;
+  }
+
+  .promo-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--rust);
+  }
+
+  /* ── FOOTER ── */
+  .article-footer {
+    background: var(--charcoal);
+    padding: 2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(244,241,236,0.04);
+  }
+
+  .article-footer span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.12);
+  }
+
+  /* ── ENTRY ANIMATIONS ── */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-content { animation: fade-up 0.7s cubic-bezier(0.25,0.46,0.45,0.94) 0.2s both; }
+  .hero-scroll-hint { animation: fade-up 0.7s cubic-bezier(0.25,0.46,0.45,0.94) 0.6s both; }
+
+  /* Scroll-triggered fade-in */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    .hero-content { padding: 0 1.25rem 3rem; }
+    .hero-top-bar { padding: 1.5rem 1.25rem; }
+    .article-container { padding: 0 1.25rem; }
+    .prose-section { grid-template-columns: 1fr; gap: 1.5rem; }
+    .prose-section-marker { text-align: left; display: flex; align-items: center; gap: 1rem; }
+    .section-num { font-size: 2rem; margin-bottom: 0; }
+    .prose-annotations { order: 3; }
+    .section-strip { grid-template-columns: 1fr; }
+    .strip-divider { height: 1px; width: 100%; }
+    .data-row { grid-template-columns: 1fr 1fr; }
+    .pull-quote-section { margin: 0 -1.25rem; padding: 3rem 1.25rem; }
+    .sources-grid { grid-template-columns: 1fr; }
+    .writer-bio { grid-template-columns: 1fr; }
+    .next-promo-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .next-story-promo { padding: 3rem 1.25rem; }
+    .article-footer { padding: 2rem 1.25rem; }
+    .sticky-nav { padding: 0 1.25rem; }
+    .hero-scroll-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- STICKY NAV (appears on scroll) -->
+<nav class="sticky-nav" id="stickyNav">
+  <span class="sticky-brand">The Daily Planet</span>
+  <span class="sticky-title">The quiet satisfying of the open-source model gap</span>
+  <span class="sticky-meta">12 min read</span>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-top-bar">
+    <div class="hero-brand">The Daily Planet</div>
+    <div class="hero-date">March 2, 2026 · Morning Edition</div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-category">Technology · In Depth</div>
+    <h1 class="hero-headline">The quiet closing of the <em>open-source model gap</em></h1>
+    <p class="hero-deck">Three research labs published benchmark results this week that will reshape the AI industry's power dynamics. The question is no longer whether open-weight models can compete — it's what happens to billion-dollar API businesses when they do.</p>
+
+    <div class="hero-meta">
+      <div class="hero-writer">
+        <div class="hero-writer-avatar">MK</div>
+        <div class="hero-writer-info">
+          <strong>Mara Kessler</strong>
+          Senior Correspondent
+        </div>
+      </div>
+      <div class="hero-meta-item">Filed 6:42 AM EAT</div>
+      <div class="hero-meta-item">12 min read</div>
+      <div class="hero-meta-item">9 sources verified</div>
+    </div>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- KEY FIGURES STRIP -->
+<div class="article-container">
+  <div class="section-strip reveal">
+    <div class="strip-cell">
+      <div class="strip-label">Benchmark Parity</div>
+      <div class="strip-value">94.2%</div>
+      <div class="strip-note">Open-weight models vs closed on MMLU-Pro</div>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-cell">
+      <div class="strip-label">Cost Reduction</div>
+      <div class="strip-value">12×</div>
+      <div class="strip-note">Self-hosted inference vs API pricing</div>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-cell">
+      <div class="strip-label">Enterprise Shift</div>
+      <div class="strip-value">41%</div>
+      <div class="strip-note">Fortune 500 evaluating self-hosted alternatives</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1 -->
+<div class="article-container">
+  <div class="prose-section reveal">
+    <div class="prose-section-marker">
+      <div class="section-num">I</div>
+      <div class="section-label">The<br>Convergence</div>
+    </div>
+
+    <div class="prose-main">
+      <h2>The benchmarks that <em>shifted the conversation</em></h2>
+
+      <p class="drop-cap">It didn't happen with a single breakthrough. There was no press conference, no dramatic product launch, no CEO on a keynote stage claiming a new era. Instead, three papers appeared on arXiv within the span of a week, each from a different research lab, each arriving at the same uncomfortable conclusion: open-weight language models have reached parity with the best proprietary systems on the tasks that matter most to enterprise buyers.</p>
+
+      <p>The first paper, from a consortium of European universities, showed that a 70-billion parameter open model achieved <strong>94.2% of GPT-5's performance</strong> on the updated MMLU-Pro benchmark while running on commodity hardware that any mid-sized company could afford. The second, from a Chinese research institute, demonstrated superior code generation on HumanEval+ and SWE-Bench, two benchmarks that enterprise engineering teams use as procurement criteria. The third, from a Bay Area nonprofit, published inference cost comparisons that showed a <strong>12× reduction</strong> in per-token costs for self-hosted deployments.</p>
+
+      <div class="inline-figure">
+        <div class="figure-label">Figure 1 · Benchmark Performance Comparison</div>
+        <div class="figure-title">Open-weight vs. proprietary model performance, 2024–2026</div>
+        <div class="bar-chart">
+          <div class="bar-group">
+            <div class="bar bar-closed" style="height:90%;"></div>
+            <div class="bar bar-open" style="height:52%;"></div>
+            <div class="bar-label">Q1 '24</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar bar-closed" style="height:92%;"></div>
+            <div class="bar bar-open" style="height:61%;"></div>
+            <div class="bar-label">Q2 '24</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar bar-closed" style="height:93%;"></div>
+            <div class="bar bar-open" style="height:70%;"></div>
+            <div class="bar-label">Q3 '24</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar bar-closed" style="height:94%;"></div>
+            <div class="bar bar-open" style="height:77%;"></div>
+            <div class="bar-label">Q4 '24</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar bar-closed" style="height:95%;"></div>
+            <div class="bar bar-open" style="height:82%;"></div>
+            <div class="bar-label">Q1 '25</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar bar-closed" style="height:96%;"></div>
+            <div class="bar bar-open" style="height:86%;"></div>
+            <div class="bar-label">Q2 '25</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar bar-closed" style="height:96%;"></div>
+            <div class="bar bar-open" style="height:89%;"></div>
+            <div class="bar-label">Q3 '25</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar bar-closed" style="height:97%;"></div>
+            <div class="bar bar-open" style="height:94%;"></div>
+            <div class="bar-label">Q1 '26</div>
+          </div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-swatch" style="background:rgba(244,241,236,0.1);"></div> Proprietary (best)</div>
+          <div class="legend-item"><div class="legend-swatch" style="background:var(--rust-pale);"></div> Open-weight (best)</div>
+        </div>
+        <div class="figure-caption">Composite score across MMLU-Pro, HumanEval+, SWE-Bench, and MATH. Normalized to best proprietary model per quarter. Source: Compiled from published benchmarks.</div>
+      </div>
+
+      <p>Taken individually, any one of these papers could be dismissed as a favorable benchmark selection or a narrow result. Together, they represent something harder to ignore: a trend line that has been accelerating for eighteen months and shows no sign of plateauing.</p>
+    </div>
+
+    <div class="prose-annotations">
+      <div class="annotation">
+        <div class="annotation-type">Context</div>
+        <div class="annotation-body">MMLU-Pro is a harder successor to the original MMLU benchmark, designed to reduce the effect of memorization. It's considered the current gold standard for reasoning evaluation.</div>
+      </div>
+
+      <div class="annotation">
+        <div class="annotation-type">Your Topic</div>
+        <div class="annotation-body"><strong>AI agents & developer tools</strong> — This directly impacts the economics of building on third-party APIs vs. self-hosted models for agentic workloads.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+</div>
+
+<!-- PULL QUOTE -->
+<div class="article-container">
+  <div class="pull-quote-section reveal">
+    <div class="pull-quote-inner">
+      <div class="pull-quote-text">"The cost curve just crossed. We're now paying more for the <em>API convenience</em> than for the intelligence itself."</div>
+      <div class="pull-quote-cite">Infrastructure Lead — Fortune 500 Fintech</div>
+      <div class="pull-quote-context">Speaking anonymously · Interviewed February 27, 2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="article-container">
+  <div class="prose-section reveal">
+    <div class="prose-section-marker">
+      <div class="section-num">II</div>
+      <div class="section-label">The<br>Economics</div>
+    </div>
+
+    <div class="prose-main">
+      <h2>When the cost curve <em>crosses</em></h2>
+
+      <p>The technical parity matters, but the economic shift is what will actually move markets. Enterprise procurement teams operate on spreadsheets, not benchmark leaderboards. And the spreadsheets are starting to tell a very clear story.</p>
+
+      <p>A Fortune 500 fintech company, which asked to remain anonymous due to active vendor negotiations, shared their internal analysis with this correspondent. Their current annual spend on proprietary AI APIs exceeds <strong>$4.2 million</strong>. An internal pilot running an equivalent open-weight model on their existing cloud infrastructure achieved comparable output quality at an annualized cost of approximately <strong>$340,000</strong> — including compute, engineering time for deployment, and ongoing maintenance.</p>
+
+      <div class="data-row">
+        <div class="data-cell">
+          <div class="data-cell-label">API Spend</div>
+          <div class="data-cell-value">$4.2M</div>
+          <div class="data-cell-note">Annual proprietary API cost</div>
+        </div>
+        <div class="data-cell">
+          <div class="data-cell-label">Self-Hosted</div>
+          <div class="data-cell-value">$340K</div>
+          <div class="data-cell-note">Equivalent open-weight deployment</div>
+        </div>
+        <div class="data-cell">
+          <div class="data-cell-label">Savings</div>
+          <div class="data-cell-value">92%</div>
+          <div class="data-cell-note">Cost reduction after migration</div>
+        </div>
+        <div class="data-cell">
+          <div class="data-cell-label">Timeline</div>
+          <div class="data-cell-value">6 mo</div>
+          <div class="data-cell-note">Projected migration period</div>
+        </div>
+      </div>
+
+      <p>The savings are dramatic, but the more interesting finding was qualitative: their engineering team reported that the open model was easier to fine-tune for their specific compliance requirements. Proprietary APIs offered general capability but limited customization. The open model offered slightly less general capability but near-perfect domain adaptation.</p>
+
+      <h3>The convenience premium</h3>
+
+      <p>This creates what one analyst called a "convenience premium" — the gap between what companies pay for the ease of an API call and what they could achieve by investing in self-hosted infrastructure. For small teams and startups, the convenience premium is worth paying. For enterprises processing millions of requests daily, it becomes the largest line item in their AI budget.</p>
+
+      <p>The infrastructure lead at the fintech company put it bluntly: the cost curve has crossed. What remains is organizational inertia and the legitimate friction of migration — not a capability gap.</p>
+    </div>
+
+    <div class="prose-annotations">
+      <div class="annotation">
+        <div class="annotation-type">Editor's Note</div>
+        <div class="annotation-body">The $4.2M figure was independently verified against published cloud spending benchmarks for companies of similar scale. The $340K estimate includes a 20% contingency buffer.</div>
+      </div>
+
+      <div class="annotation">
+        <div class="annotation-type">Research Note</div>
+        <div class="annotation-body">Lead Researcher flagged three additional enterprise case studies with similar cost profiles. These will be covered in a follow-up piece later this week.</div>
+      </div>
+
+      <div class="annotation">
+        <div class="annotation-type">Your Interest</div>
+        <div class="annotation-body"><strong>Developer infrastructure</strong> — The "convenience premium" concept maps directly to the value proposition of hosting services that simplify self-hosted model deployment.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="article-container">
+  <div class="prose-section reveal">
+    <div class="prose-section-marker">
+      <div class="section-num">III</div>
+      <div class="section-label">What<br>Comes Next</div>
+    </div>
+
+    <div class="prose-main">
+      <h2>The compounding advantage of <em>open research</em></h2>
+
+      <p>What's driving this convergence isn't a single technique but an accumulation of publicly shared research. Over the past eighteen months, the open-source AI community has produced advances in synthetic data generation, parameter-efficient fine-tuning, inference optimization, and post-training alignment that have compounded in ways that closed development cannot easily replicate.</p>
+
+      <p>The dynamic is structural: when one lab publishes a training optimization, dozens of teams worldwide can incorporate it within weeks. Proprietary labs must develop each advance internally. The open ecosystem has a higher clock speed for distributing improvements, even if any single lab has fewer resources than the largest closed labs.</p>
+
+      <div class="inline-image"></div>
+      <div class="image-caption">Researchers at the Open Model Collective's Berlin lab, where a team of twelve maintains one of the highest-performing open-weight language models. <span class="image-credit">Photo · Associated Press</span></div>
+
+      <p>This doesn't mean proprietary models are obsolete. The largest labs still hold advantages in scale, in proprietary datasets, and in the ability to make expensive bets that no individual open-source contributor could justify. But the gap has narrowed from a chasm to a margin — and for an increasing number of practical applications, that margin is smaller than the cost difference.</p>
+
+      <p>The implications for the AI industry's business models are significant. Companies built entirely on API revenue from general-purpose models may need to find new sources of differentiation. Companies built on infrastructure — the tooling, orchestration, and deployment layers that make AI useful in production — are likely to see their value increase regardless of which models win.</p>
+
+      <p><strong>The signal is clear:</strong> the question is no longer whether open models can compete. It's what the industry builds on top of them.</p>
+    </div>
+
+    <div class="prose-annotations">
+      <div class="annotation">
+        <div class="annotation-type">Analysis</div>
+        <div class="annotation-body">This structural dynamic — high clock speed for distributed improvement — mirrors what happened with Linux vs. proprietary Unix in the 1990s. The parallel is imperfect but instructive.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SOURCES -->
+<div class="article-container">
+  <div class="sources-section reveal">
+    <div class="sources-header">Sources · 9 Verified by Lead Editor</div>
+    <div class="sources-grid">
+      <div class="source-card">
+        <div class="source-check">✓</div>
+        <div class="source-info">
+          <div class="source-name">European Universities Consortium benchmark paper</div>
+          <div class="source-detail">arXiv preprint · Published Feb 26, 2026</div>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-check">✓</div>
+        <div class="source-info">
+          <div class="source-name">Shanghai AI Lab code generation analysis</div>
+          <div class="source-detail">arXiv preprint · Published Feb 28, 2026</div>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-check">✓</div>
+        <div class="source-info">
+          <div class="source-name">AI Safety Institute inference cost study</div>
+          <div class="source-detail">Published report · March 1, 2026</div>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-check">✓</div>
+        <div class="source-info">
+          <div class="source-name">Fortune 500 fintech internal analysis</div>
+          <div class="source-detail">Anonymized · Shared Feb 27, 2026</div>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-check">✓</div>
+        <div class="source-info">
+          <div class="source-name">Reuters technology desk reporting</div>
+          <div class="source-detail">Wire service · Feb 28–Mar 1, 2026</div>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-check">✓</div>
+        <div class="source-info">
+          <div class="source-name">Financial Times enterprise AI survey</div>
+          <div class="source-detail">Published analysis · March 1, 2026</div>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-check">✓</div>
+        <div class="source-info">
+          <div class="source-name">Linux Foundation AI infrastructure report</div>
+          <div class="source-detail">Annual report · February 2026</div>
+        </div>
+      </div>
+      <div class="source-card">
+        <div class="source-check">✓</div>
+        <div class="source-info">
+          <div class="source-name">Two anonymous enterprise engineering leads</div>
+          <div class="source-detail">Interviews · Feb 25–27, 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WRITER BIO -->
+<div class="article-container">
+  <div class="writer-bio reveal">
+    <div class="bio-avatar">MK</div>
+    <div class="bio-content">
+      <div class="bio-label">About the Writer</div>
+      <div class="bio-name">Mara Kessler</div>
+      <div class="bio-text">Senior correspondent covering AI infrastructure, enterprise technology, and the economics of model deployment. Mara's writing style favors structural analysis over hype — connecting technical developments to their business implications with precision and restraint.</div>
+      <div class="bio-style-tag">Writing Style: Analytical · Evidence-First · Understated</div>
+    </div>
+  </div>
+</div>
+
+<!-- NEXT STORY PROMO -->
+<div class="next-story-promo">
+  <div class="next-promo-inner">
+    <div>
+      <div class="promo-label">Up Next in This Edition</div>
+      <div class="promo-title">EU passes landmark AI transparency act — companies have <em>ninety days</em></div>
+      <p class="promo-excerpt">The European Parliament voted 412-89 to enact the most comprehensive AI regulation in history. What it means for developers, enterprises, and the open-source ecosystem.</p>
+    </div>
+    <div class="promo-image"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="article-footer">
+  <span>The Daily Planet · Built with Glove × Station</span>
+  <span>dterminal · March 2026</span>
+</div>
+
+<script>
+  // Reading progress bar
+  window.addEventListener('scroll', () => {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+    const progress = Math.min((scrolled / docHeight) * 100, 100);
+    document.getElementById('progressBar').style.width = progress + '%';
+  });
+
+  // Sticky nav appears after hero
+  const hero = document.querySelector('.hero');
+  const stickyNav = document.getElementById('stickyNav');
+
+  const heroObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) {
+        stickyNav.classList.add('visible');
+      } else {
+        stickyNav.classList.remove('visible');
+      }
+    });
+  }, { threshold: 0 });
+
+  heroObserver.observe(hero);
+
+  // Scroll-triggered reveals
+  const revealElements = document.querySelectorAll('.reveal');
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { rootMargin: '-60px 0px', threshold: 0.1 });
+
+  revealElements.forEach(el => revealObserver.observe(el));
+</script>
+
+</body>
+</html>

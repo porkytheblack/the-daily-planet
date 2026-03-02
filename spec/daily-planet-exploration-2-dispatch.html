@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Daily Planet — Exploration 2: Dispatch</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rust: #8B5A2B;
+    --rust-light: #A0622D;
+    --rust-pale: #C4834A;
+    --patina: #4A6741;
+    --patina-light: #5C7C52;
+    --patina-pale: #6B9962;
+    --concrete: #F4F1EC;
+    --concrete-dark: #E8E4DC;
+    --charcoal: #1C1C1E;
+    --charcoal-mid: #2C2C2E;
+    --charcoal-light: #38383A;
+    --wire: #3A3A3C;
+    --muted: #8A8A8E;
+    --muted-light: #AEAEB2;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--charcoal);
+    color: var(--concrete);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* GRAIN */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 3rem;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    border-bottom: 1px solid rgba(244,241,236,0.06);
+    padding: 0.75rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .status-bar span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.2);
+  }
+
+  .status-live {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--patina-pale) !important;
+  }
+
+  .status-live::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--patina-pale);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(107,153,98,0.4); }
+    50% { opacity:0.6; box-shadow: 0 0 0 4px rgba(107,153,98,0); }
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    padding: 4rem 0 3rem;
+    position: relative;
+  }
+
+  .masthead::before {
+    content: 'DISPATCH';
+    position: absolute;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: clamp(6rem, 18vw, 14rem);
+    color: rgba(244,241,236,0.015);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .masthead-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .masthead-eyebrow::before {
+    content: '';
+    width: 2rem;
+    height: 1px;
+    background: var(--rust);
+  }
+
+  .masthead-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 400;
+    line-height: 0.95;
+    color: var(--concrete);
+    margin-bottom: 1.5rem;
+  }
+
+  .masthead-title em {
+    font-style: italic;
+    color: var(--rust-pale);
+  }
+
+  .masthead-meta {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    gap: 0;
+    border-top: 2px solid var(--rust);
+    border-bottom: 1px solid rgba(244,241,236,0.06);
+  }
+
+  .meta-cell {
+    padding: 1rem 1.25rem;
+  }
+
+  .meta-divider {
+    background: rgba(244,241,236,0.06);
+  }
+
+  .meta-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.2);
+    margin-bottom: 0.35rem;
+  }
+
+  .meta-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: rgba(244,241,236,0.6);
+    letter-spacing: 0.05em;
+  }
+
+  .meta-value strong {
+    color: var(--concrete);
+    font-weight: 400;
+  }
+
+  /* ── DISPATCH ITEMS ── */
+  .dispatch-list {
+    padding: 2.5rem 0;
+  }
+
+  .dispatch-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 2rem;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid rgba(244,241,236,0.04);
+    position: relative;
+  }
+
+  .dispatch-item::before {
+    content: '';
+    position: absolute;
+    left: 80px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(139,90,43,0.15);
+  }
+
+  .dispatch-time {
+    text-align: right;
+    padding-right: 2rem;
+  }
+
+  .dispatch-time-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: rgba(244,241,236,0.3);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+  }
+
+  .dispatch-priority {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    display: inline-block;
+  }
+
+  .priority-high {
+    background: rgba(139,90,43,0.2);
+    color: var(--rust-pale);
+  }
+
+  .priority-normal {
+    background: rgba(244,241,236,0.04);
+    color: rgba(244,241,236,0.25);
+  }
+
+  .priority-breaking {
+    background: rgba(139,90,43,0.3);
+    color: var(--rust-pale);
+    animation: break-flash 2s ease-in-out infinite;
+  }
+
+  @keyframes break-flash {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .dispatch-content {
+    padding-left: 2rem;
+  }
+
+  .dispatch-category {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+    margin-bottom: 0.75rem;
+  }
+
+  .dispatch-headline {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--concrete);
+    margin-bottom: 1rem;
+  }
+
+  .dispatch-headline em {
+    font-style: italic;
+    color: var(--rust-pale);
+  }
+
+  .dispatch-body {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: rgba(244,241,236,0.45);
+    font-weight: 300;
+    margin-bottom: 1.25rem;
+    max-width: 60ch;
+  }
+
+  .dispatch-writer-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .dispatch-avatar {
+    width: 20px;
+    height: 20px;
+    background: rgba(244,241,236,0.05);
+    border: 1px solid rgba(244,241,236,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.5rem;
+    color: rgba(244,241,236,0.3);
+  }
+
+  .dispatch-writer-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: rgba(244,241,236,0.3);
+    letter-spacing: 0.08em;
+  }
+
+  .dispatch-sources {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: rgba(244,241,236,0.15);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── ANALYSIS BLOCK ── */
+  .analysis-block {
+    background: rgba(244,241,236,0.02);
+    border-left: 2px solid var(--rust);
+    padding: 1.5rem 1.75rem;
+    margin: 1.5rem 0;
+  }
+
+  .analysis-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+    margin-bottom: 0.75rem;
+  }
+
+  .analysis-text {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: rgba(244,241,236,0.6);
+    line-height: 1.5;
+  }
+
+  /* ── AGENTS PANEL ── */
+  .agents-panel {
+    border: 1px solid rgba(244,241,236,0.06);
+    margin: 3rem 0;
+  }
+
+  .agents-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(244,241,236,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .agents-header-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+  }
+
+  .agents-header-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: rgba(244,241,236,0.2);
+    letter-spacing: 0.08em;
+  }
+
+  .agents-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(244,241,236,0.04);
+  }
+
+  .agent-card {
+    background: var(--charcoal);
+    padding: 1.5rem;
+  }
+
+  .agent-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+  }
+
+  .agent-status-dot.active { background: var(--patina-pale); animation: pulse 2s ease-in-out infinite; }
+  .agent-status-dot.idle { background: rgba(244,241,236,0.15); }
+
+  .agent-role {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.2);
+    margin-bottom: 0.4rem;
+  }
+
+  .agent-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.05rem;
+    color: var(--concrete);
+    margin-bottom: 0.5rem;
+  }
+
+  .agent-task {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: rgba(244,241,236,0.3);
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── AUDIO DISPATCH ── */
+  .audio-section {
+    background: rgba(139,90,43,0.08);
+    border: 1px solid rgba(139,90,43,0.15);
+    padding: 2rem;
+    margin: 2rem 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .audio-play {
+    width: 48px;
+    height: 48px;
+    border: 1.5px solid var(--rust-pale);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .audio-play:hover {
+    background: rgba(139,90,43,0.15);
+  }
+
+  .audio-triangle {
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 12px solid var(--rust-pale);
+    margin-left: 3px;
+  }
+
+  .audio-info-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+    margin-bottom: 0.4rem;
+  }
+
+  .audio-info-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.15rem;
+    color: var(--concrete);
+    margin-bottom: 0.75rem;
+  }
+
+  .audio-waveform {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 20px;
+  }
+
+  .wave-bar {
+    width: 2px;
+    background: rgba(139,90,43,0.3);
+    border-radius: 1px;
+    animation: wave-idle 1.5s ease-in-out infinite;
+  }
+
+  @keyframes wave-idle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+
+  /* ── FOOTER ── */
+  .dispatch-footer {
+    border-top: 2px solid var(--rust);
+    padding: 2rem 0;
+    margin-top: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dispatch-footer span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(244,241,236,0.15);
+  }
+
+  /* ── ENTRY ANIMATIONS ── */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .masthead { animation: fade-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) both; }
+  .dispatch-item:nth-child(1) { animation: fade-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) 0.1s both; }
+  .dispatch-item:nth-child(2) { animation: fade-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) 0.2s both; }
+  .dispatch-item:nth-child(3) { animation: fade-up 0.5s cubic-bezier(0.25,0.46,0.45,0.94) 0.3s both; }
+
+  @media (max-width: 800px) {
+    .page { padding: 0 1.25rem; }
+    .status-bar { padding: 0.75rem 1.25rem; }
+    .dispatch-item { grid-template-columns: 1fr; gap: 0.75rem; }
+    .dispatch-item::before { display: none; }
+    .dispatch-time { text-align: left; padding-right: 0; display: flex; align-items: center; gap: 0.75rem; }
+    .dispatch-content { padding-left: 0; }
+    .agents-grid { grid-template-columns: 1fr 1fr; }
+    .audio-section { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <span>The Daily Planet · Dispatch Mode</span>
+  <span class="status-live">Transmitting</span>
+  <span>March 2, 2026 · 07:00 EAT</span>
+</div>
+
+<!-- MASTHEAD -->
+<div class="page">
+  <div class="masthead">
+    <div class="masthead-eyebrow">Morning Dispatch · Vol 1 No 47</div>
+    <h1 class="masthead-title">The Daily<br><em>Planet</em></h1>
+
+    <div class="masthead-meta">
+      <div class="meta-cell">
+        <div class="meta-label">Edition</div>
+        <div class="meta-value"><strong>Morning</strong> · 07:00 EAT</div>
+      </div>
+      <div class="meta-divider"></div>
+      <div class="meta-cell">
+        <div class="meta-label">Reports Filed</div>
+        <div class="meta-value"><strong>5</strong> dispatches · 18 sources</div>
+      </div>
+      <div class="meta-divider"></div>
+      <div class="meta-cell">
+        <div class="meta-label">Next Delivery</div>
+        <div class="meta-value"><strong>12:00 PM</strong> · Afternoon Edition</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIO DISPATCH -->
+  <div class="audio-section">
+    <div class="audio-play">
+      <div class="audio-triangle"></div>
+    </div>
+    <div>
+      <div class="audio-info-label">Audio Briefing · 4:12</div>
+      <div class="audio-info-title">Morning dispatch, narrated.</div>
+      <div class="audio-waveform">
+        <div class="wave-bar" style="height:4px; animation-delay:0s;"></div>
+        <div class="wave-bar" style="height:8px; animation-delay:0.1s;"></div>
+        <div class="wave-bar" style="height:14px; animation-delay:0.15s;"></div>
+        <div class="wave-bar" style="height:6px; animation-delay:0.2s;"></div>
+        <div class="wave-bar" style="height:18px; animation-delay:0.25s;"></div>
+        <div class="wave-bar" style="height:10px; animation-delay:0.3s;"></div>
+        <div class="wave-bar" style="height:4px; animation-delay:0.35s;"></div>
+        <div class="wave-bar" style="height:12px; animation-delay:0.4s;"></div>
+        <div class="wave-bar" style="height:20px; animation-delay:0.45s;"></div>
+        <div class="wave-bar" style="height:8px; animation-delay:0.5s;"></div>
+        <div class="wave-bar" style="height:14px; animation-delay:0.55s;"></div>
+        <div class="wave-bar" style="height:6px; animation-delay:0.6s;"></div>
+        <div class="wave-bar" style="height:10px; animation-delay:0.65s;"></div>
+        <div class="wave-bar" style="height:16px; animation-delay:0.7s;"></div>
+        <div class="wave-bar" style="height:4px; animation-delay:0.75s;"></div>
+        <div class="wave-bar" style="height:12px; animation-delay:0.8s;"></div>
+        <div class="wave-bar" style="height:8px; animation-delay:0.85s;"></div>
+        <div class="wave-bar" style="height:18px; animation-delay:0.9s;"></div>
+        <div class="wave-bar" style="height:6px; animation-delay:0.95s;"></div>
+        <div class="wave-bar" style="height:10px; animation-delay:1s;"></div>
+        <div class="wave-bar" style="height:14px; animation-delay:1.05s;"></div>
+        <div class="wave-bar" style="height:4px; animation-delay:1.1s;"></div>
+        <div class="wave-bar" style="height:8px; animation-delay:1.15s;"></div>
+        <div class="wave-bar" style="height:12px; animation-delay:1.2s;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISPATCH LIST -->
+  <div class="dispatch-list">
+
+    <!-- DISPATCH 1 — BREAKING -->
+    <div class="dispatch-item">
+      <div class="dispatch-time">
+        <div class="dispatch-time-value">06:58</div>
+        <div class="dispatch-priority priority-breaking">Breaking</div>
+      </div>
+      <div class="dispatch-content">
+        <div class="dispatch-category">Regulation · Global</div>
+        <h2 class="dispatch-headline">EU passes landmark AI transparency act — <em>90 days to comply</em></h2>
+        <p class="dispatch-body">The European Parliament voted 412-89 to enact the AI Transparency and Accountability Act, requiring all companies operating AI systems within the EU to disclose training data sources, model architectures, and downstream deployment contexts. The regulation takes effect in 90 days.</p>
+
+        <div class="analysis-block">
+          <div class="analysis-label">Editor's Note</div>
+          <div class="analysis-text">This is the first regulation to mandate architectural disclosure, not just behavioral compliance. The second-order effects on open-source development are worth watching closely.</div>
+        </div>
+
+        <div class="dispatch-writer-row">
+          <div class="dispatch-avatar">MK</div>
+          <span class="dispatch-writer-name">Mara Kessler · Senior Correspondent</span>
+          <span class="dispatch-sources">· 7 sources verified</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISPATCH 2 -->
+    <div class="dispatch-item">
+      <div class="dispatch-time">
+        <div class="dispatch-time-value">06:42</div>
+        <div class="dispatch-priority priority-high">High</div>
+      </div>
+      <div class="dispatch-content">
+        <div class="dispatch-category">Technology · AI</div>
+        <h2 class="dispatch-headline">Open-weight models close the gap on proprietary systems</h2>
+        <p class="dispatch-body">Three research labs published benchmark results this week showing community-built models matching or exceeding closed systems on reasoning and code generation tasks. Enterprise procurement patterns are already shifting — self-hosted alternatives now offer comparable performance at significantly lower operational cost.</p>
+
+        <div class="dispatch-writer-row">
+          <div class="dispatch-avatar">JN</div>
+          <span class="dispatch-writer-name">Jules Nakamura · Tech Desk</span>
+          <span class="dispatch-sources">· 4 sources verified</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISPATCH 3 -->
+    <div class="dispatch-item">
+      <div class="dispatch-time">
+        <div class="dispatch-time-value">06:15</div>
+        <div class="dispatch-priority priority-normal">Normal</div>
+      </div>
+      <div class="dispatch-content">
+        <div class="dispatch-category">Blockchain · East Africa</div>
+        <h2 class="dispatch-headline">Nairobi fintech corridor posts record startup formation</h2>
+        <p class="dispatch-body">The Westlands technology corridor recorded 34 new fintech incorporations in February, a 60% increase year-over-year. International venture capital is following — three Southeast Asian funds opened Nairobi offices this quarter, with combined regional allocation exceeding $180M.</p>
+
+        <div class="dispatch-writer-row">
+          <div class="dispatch-avatar">AO</div>
+          <span class="dispatch-writer-name">Amara Osei · Africa Bureau</span>
+          <span class="dispatch-sources">· 5 sources verified</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AGENTS PANEL -->
+  <div class="agents-panel">
+    <div class="agents-header">
+      <span class="agents-header-title">Newsroom Agents</span>
+      <span class="agents-header-count">4 active · 1 idle</span>
+    </div>
+    <div class="agents-grid">
+      <div class="agent-card">
+        <div class="agent-status-dot active"></div>
+        <div class="agent-role">Research</div>
+        <div class="agent-name">Lead Researcher</div>
+        <div class="agent-task">Scanning 47 sources for afternoon edition. Last cycle: 12m ago.</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-status-dot active"></div>
+        <div class="agent-role">Editorial</div>
+        <div class="agent-name">Lead Editor</div>
+        <div class="agent-task">Verifying 2 reports queued for noon dispatch. Priority: breaking news.</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-status-dot idle"></div>
+        <div class="agent-role">Writer</div>
+        <div class="agent-name">Mara Kessler</div>
+        <div class="agent-task">Idle since 06:58. Awaiting next assignment from editor.</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-status-dot active"></div>
+        <div class="agent-role">Writer</div>
+        <div class="agent-name">Jules Nakamura</div>
+        <div class="agent-task">Drafting afternoon markets update. 340 words in progress.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="dispatch-footer">
+    <span>The Daily Planet · Built with Glove × Station</span>
+    <span>dterminal · Dispatch Mode · v1.0</span>
+  </div>
+</div>
+
+</body>
+</html>

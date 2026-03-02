@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Daily Planet — Exploration 1: Broadsheet</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rust: #8B5A2B;
+    --rust-light: #A0622D;
+    --rust-pale: #C4834A;
+    --patina: #4A6741;
+    --patina-light: #5C7C52;
+    --patina-pale: #6B9962;
+    --concrete: #F4F1EC;
+    --concrete-dark: #E8E4DC;
+    --concrete-mid: #D4CEBF;
+    --charcoal: #1C1C1E;
+    --charcoal-mid: #2C2C2E;
+    --wire: #3A3A3C;
+    --muted: #8A8A8E;
+    --muted-light: #AEAEB2;
+    --sky: #7FB2CC;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--concrete);
+    color: var(--charcoal);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 300;
+  }
+
+  /* GRAIN */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 3rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    padding: 2rem 0 0;
+    text-align: center;
+    position: relative;
+  }
+
+  .masthead-meta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(139,90,43,0.15);
+    margin-bottom: 1.5rem;
+  }
+
+  .masthead-meta-top span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .masthead-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .masthead-status::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--patina-pale);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(107,153,98,0.4); }
+    50% { opacity:0.7; box-shadow: 0 0 0 4px rgba(107,153,98,0); }
+  }
+
+  .masthead-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    font-weight: 400;
+    line-height: 0.9;
+    color: var(--charcoal);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .masthead-title em {
+    font-style: italic;
+    color: var(--rust);
+  }
+
+  .masthead-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .masthead-divider {
+    height: 3px;
+    background: var(--charcoal);
+    margin-bottom: 2px;
+  }
+
+  .masthead-divider-thin {
+    height: 1px;
+    background: var(--charcoal);
+    margin-bottom: 1rem;
+  }
+
+  .masthead-meta-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .edition-info {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .edition-info strong {
+    color: var(--rust);
+    font-weight: 500;
+  }
+
+  /* ── NEWSPAPER GRID ── */
+  .paper-grid {
+    display: grid;
+    grid-template-columns: 2fr 1px 1fr;
+    gap: 0;
+    margin-bottom: 2rem;
+  }
+
+  .grid-divider {
+    background: rgba(139,90,43,0.2);
+  }
+
+  .col-main {
+    padding-right: 2rem;
+  }
+
+  .col-sidebar {
+    padding-left: 2rem;
+  }
+
+  /* ── LEAD STORY ── */
+  .lead-story {
+    margin-bottom: 2.5rem;
+  }
+
+  .story-category {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .story-category::before {
+    content: '';
+    width: 1.25rem;
+    height: 1px;
+    background: var(--rust);
+  }
+
+  .lead-headline {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--charcoal);
+    margin-bottom: 1rem;
+  }
+
+  .lead-headline em {
+    font-style: italic;
+    color: var(--rust-light);
+  }
+
+  .story-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(139,90,43,0.12);
+  }
+
+  .story-writer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .writer-avatar {
+    width: 24px;
+    height: 24px;
+    background: var(--charcoal);
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--concrete);
+    letter-spacing: 0.05em;
+  }
+
+  .writer-info {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .writer-info strong {
+    color: var(--wire);
+    font-weight: 500;
+    display: block;
+  }
+
+  .story-timestamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted-light);
+    letter-spacing: 0.08em;
+  }
+
+  .lead-image-placeholder {
+    width: 100%;
+    height: 280px;
+    background: var(--charcoal);
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lead-image-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(139,90,43,0.15) 0%, transparent 60%);
+  }
+
+  .lead-image-placeholder::after {
+    content: 'Photo · Reuters';
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: rgba(244,241,236,0.3);
+    text-transform: uppercase;
+  }
+
+  .lead-body {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--wire);
+    font-weight: 300;
+  }
+
+  .lead-body p {
+    margin-bottom: 1rem;
+  }
+
+  .lead-body .drop-cap::first-letter {
+    font-family: 'Instrument Serif', serif;
+    font-size: 4rem;
+    float: left;
+    line-height: 0.8;
+    margin-right: 0.5rem;
+    margin-top: 0.15rem;
+    color: var(--rust);
+  }
+
+  /* ── SECONDARY STORIES ── */
+  .story-divider {
+    height: 1px;
+    background: rgba(139,90,43,0.15);
+    margin: 2rem 0;
+  }
+
+  .secondary-story {
+    margin-bottom: 2rem;
+  }
+
+  .secondary-headline {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--charcoal);
+    margin-bottom: 0.75rem;
+  }
+
+  .secondary-body {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .sidebar-header {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rust);
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--charcoal);
+    margin-bottom: 1.25rem;
+  }
+
+  .sidebar-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(139,90,43,0.1);
+  }
+
+  .sidebar-item:last-child {
+    border-bottom: none;
+  }
+
+  .sidebar-item-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem;
+    color: rgba(139,90,43,0.2);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .sidebar-item-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--charcoal);
+    margin-bottom: 0.35rem;
+  }
+
+  .sidebar-item-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── BREAKING BANNER ── */
+  .breaking-banner {
+    background: var(--charcoal);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .breaking-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust-pale);
+    padding: 0 1.5rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .breaking-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--rust-pale);
+    border-radius: 50%;
+    animation: break-pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes break-pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  .breaking-ticker {
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .ticker-inner {
+    display: flex;
+    animation: ticker-slide 25s linear infinite;
+    white-space: nowrap;
+  }
+
+  @keyframes ticker-slide {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .ticker-inner span {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.82rem;
+    color: rgba(244,241,236,0.5);
+    font-weight: 300;
+    padding: 0 3rem;
+  }
+
+  .ticker-inner span strong {
+    color: var(--concrete);
+    font-weight: 400;
+  }
+
+  /* ── PULL QUOTE ── */
+  .pull-quote {
+    padding: 1.5rem 0;
+    margin: 1.5rem 0;
+    border-top: 1px solid rgba(139,90,43,0.2);
+    border-bottom: 1px solid rgba(139,90,43,0.2);
+  }
+
+  .pull-quote blockquote {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--charcoal);
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+
+  .pull-quote cite {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-style: normal;
+  }
+
+  /* ── BOTTOM GRID ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: rgba(139,90,43,0.12);
+    margin-bottom: 2rem;
+  }
+
+  .bottom-card {
+    background: var(--concrete);
+    padding: 1.75rem;
+  }
+
+  .bottom-card-img {
+    height: 140px;
+    background: var(--charcoal-mid);
+    margin-bottom: 1.25rem;
+    position: relative;
+  }
+
+  .bottom-card-img::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--rust);
+  }
+
+  .bottom-card .story-category {
+    margin-bottom: 0.5rem;
+  }
+
+  .bottom-card-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--charcoal);
+    margin-bottom: 0.5rem;
+  }
+
+  .bottom-card-excerpt {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ── FOOTER ── */
+  .paper-footer {
+    background: var(--charcoal);
+    padding: 2rem 3rem;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 2px solid var(--rust);
+  }
+
+  .paper-footer span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .footer-brand {
+    color: rgba(244,241,236,0.3);
+  }
+
+  .footer-powered {
+    color: rgba(244,241,236,0.15);
+  }
+
+  /* ── ENTRY ANIMATIONS ── */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .masthead { animation: fade-up 0.6s cubic-bezier(0.25,0.46,0.45,0.94) both; }
+  .lead-story { animation: fade-up 0.6s cubic-bezier(0.25,0.46,0.45,0.94) 0.15s both; }
+  .col-sidebar { animation: fade-up 0.6s cubic-bezier(0.25,0.46,0.45,0.94) 0.25s both; }
+  .bottom-grid { animation: fade-up 0.6s cubic-bezier(0.25,0.46,0.45,0.94) 0.35s both; }
+
+  @media (max-width: 800px) {
+    .page { padding: 0 1.25rem; }
+    .paper-grid { grid-template-columns: 1fr; }
+    .grid-divider { display: none; }
+    .col-main { padding-right: 0; }
+    .col-sidebar { padding-left: 0; padding-top: 2rem; border-top: 1px solid rgba(139,90,43,0.15); }
+    .bottom-grid { grid-template-columns: 1fr; }
+    .paper-footer { padding: 2rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BREAKING BANNER -->
+<div class="page">
+  <div class="breaking-banner" style="margin-left:-3rem; margin-right:-3rem; padding-left:3rem; padding-right:3rem;">
+    <div class="breaking-label">
+      <div class="breaking-dot"></div>
+      Breaking
+    </div>
+    <div class="breaking-ticker">
+      <div class="ticker-inner">
+        <span><strong>EU passes landmark AI regulation</strong> — Companies have 90 days to comply with new transparency requirements</span>
+        <span><strong>Federal Reserve signals rate decision</strong> — Markets respond with measured optimism ahead of Wednesday announcement</span>
+        <span><strong>EU passes landmark AI regulation</strong> — Companies have 90 days to comply with new transparency requirements</span>
+        <span><strong>Federal Reserve signals rate decision</strong> — Markets respond with measured optimism ahead of Wednesday announcement</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MASTHEAD -->
+<div class="page">
+  <div class="masthead">
+    <div class="masthead-meta-top">
+      <span>Vol. 1 · No. 47</span>
+      <div class="masthead-status">
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--patina-pale);">Transmitting</span>
+      </div>
+      <span>March 2, 2026</span>
+    </div>
+
+    <div class="masthead-title">The Daily <em>Planet</em></div>
+    <div class="masthead-sub">Your agentic newsroom — researched, verified, written</div>
+
+    <div class="masthead-divider"></div>
+    <div class="masthead-divider-thin"></div>
+
+    <div class="masthead-meta-bottom">
+      <div class="edition-info"><strong>Morning Edition</strong> · 7:00 AM EAT · Next delivery: 12:00 PM</div>
+      <div class="edition-info">5 articles · 3 writers · 12 sources verified</div>
+    </div>
+  </div>
+
+  <!-- NEWSPAPER GRID -->
+  <div class="paper-grid">
+    <!-- MAIN COLUMN -->
+    <div class="col-main">
+      <div class="lead-story">
+        <div class="story-category">Technology · Lead Report</div>
+        <h1 class="lead-headline">Open-source AI models are closing the gap — and <em>industry knows it</em></h1>
+
+        <div class="story-meta">
+          <div class="story-writer">
+            <div class="writer-avatar">MK</div>
+            <div class="writer-info">
+              <strong>Mara Kessler</strong>
+              Senior Correspondent
+            </div>
+          </div>
+          <div class="story-timestamp">Filed 6:42 AM · Verified by Editor</div>
+        </div>
+
+        <div class="lead-image-placeholder"></div>
+
+        <div class="lead-body">
+          <p class="drop-cap">The latest round of benchmark results has sent a clear signal through the AI industry: open-weight models are no longer playing catch-up. They're setting the pace. Three separate research labs published findings this week showing that community-built models now match or exceed proprietary systems on key reasoning and code generation tasks.</p>
+          <p>The implications extend beyond technical capability. Enterprise adoption patterns are shifting — procurement teams that once defaulted to closed APIs are now evaluating self-hosted alternatives with comparable performance and significantly lower operational costs.</p>
+        </div>
+
+        <div class="pull-quote">
+          <blockquote>"The cost curve just crossed. We're now paying more for the API convenience than for the intelligence itself."</blockquote>
+          <cite>— Infrastructure lead at a Fortune 500 fintech, speaking anonymously</cite>
+        </div>
+
+        <div class="lead-body">
+          <p>What's driving this convergence isn't a single breakthrough but an accumulation of open research. Techniques in synthetic data generation, efficient fine-tuning, and inference optimization have compounded over eighteen months of public collaboration.</p>
+        </div>
+      </div>
+
+      <div class="story-divider"></div>
+
+      <div class="secondary-story">
+        <div class="story-category">Markets</div>
+        <h2 class="secondary-headline">Bond yields hold steady as investors digest mixed employment signals</h2>
+        <div class="story-meta">
+          <div class="story-writer">
+            <div class="writer-avatar">JN</div>
+            <div class="writer-info">
+              <strong>Jules Nakamura</strong>
+              Markets Desk
+            </div>
+          </div>
+          <div class="story-timestamp">Filed 6:15 AM</div>
+        </div>
+        <p class="secondary-body">Treasury yields remained in a narrow range Friday as traders weighed conflicting indicators. The 10-year note held at 4.23% following Thursday's upward revision to Q4 GDP and a softer-than-expected weekly jobless claims report. Analysts note the market is pricing in a pause rather than a pivot.</p>
+      </div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="grid-divider"></div>
+
+    <!-- SIDEBAR -->
+    <div class="col-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-header">Your Topics · Trending</div>
+        <div class="sidebar-item">
+          <div class="sidebar-item-num">01</div>
+          <div class="sidebar-item-title">Solana introduces parallel transaction processing for DeFi applications</div>
+          <div class="sidebar-item-meta">Blockchain · 14 min read</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-item-num">02</div>
+          <div class="sidebar-item-title">Kenya's tech hub expansion draws $2.1B in first quarter investments</div>
+          <div class="sidebar-item-meta">East Africa · 8 min read</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-item-num">03</div>
+          <div class="sidebar-item-title">TypeScript 6.0 brings native pattern matching and effect system</div>
+          <div class="sidebar-item-meta">Developer Tools · 6 min read</div>
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-item-num">04</div>
+          <div class="sidebar-item-title">Voice-first interfaces see 340% growth in enterprise adoption</div>
+          <div class="sidebar-item-meta">AI Agents · 11 min read</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-header">Newsroom · Activity</div>
+        <div style="padding: 1rem 0; display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="width:5px; height:5px; border-radius:50%; background:var(--patina-pale);"></div>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:var(--wire); letter-spacing:0.05em;"><strong style="font-weight:500;">Lead Researcher</strong> scanning 47 sources</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="width:5px; height:5px; border-radius:50%; background:var(--patina-pale);"></div>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:var(--wire); letter-spacing:0.05em;"><strong style="font-weight:500;">Editor</strong> verified 3 reports</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="width:5px; height:5px; border-radius:50%; background:var(--muted-light);"></div>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:var(--muted); letter-spacing:0.05em;"><strong style="font-weight:500;">Mara K.</strong> idle since 6:42 AM</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="width:5px; height:5px; border-radius:50%; background:var(--patina-pale);"></div>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:var(--wire); letter-spacing:0.05em;"><strong style="font-weight:500;">Jules N.</strong> drafting afternoon update</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-header">Audio Briefing</div>
+        <div style="padding:1.25rem; background:var(--charcoal); margin-top:0.5rem;">
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:0.58rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--rust-pale); margin-bottom:0.75rem;">Morning Report · 4:32</div>
+          <div style="font-family:'Instrument Serif',serif; font-size:1.05rem; color:var(--concrete); margin-bottom:1rem; line-height:1.3;">Today's top stories, explained in under five minutes.</div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="width:32px; height:32px; border:1.5px solid var(--rust-pale); display:flex; align-items:center; justify-content:center; cursor:pointer;">
+              <div style="width:0; height:0; border-top:5px solid transparent; border-bottom:5px solid transparent; border-left:8px solid var(--rust-pale); margin-left:2px;"></div>
+            </div>
+            <div style="flex:1; height:2px; background:rgba(244,241,236,0.1); position:relative;">
+              <div style="position:absolute; left:0; top:0; height:100%; width:0%; background:var(--rust-pale);"></div>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:0.58rem; color:rgba(244,241,236,0.3);">4:32</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM STORY GRID -->
+  <div style="margin-bottom:1.5rem;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:0.75rem; border-bottom:2px solid var(--charcoal);">
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:0.58rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--rust);">More Stories</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:0.55rem; letter-spacing:0.1em; color:var(--muted);">From your interests</span>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="bottom-card">
+      <div class="bottom-card-img"></div>
+      <div class="story-category">Blockchain</div>
+      <div class="bottom-card-title">Move language ecosystem matures as Aptos DeFi TVL crosses $4B milestone</div>
+      <p class="bottom-card-excerpt">The Aptos blockchain ecosystem has reached a significant milestone with total value locked in DeFi protocols surpassing $4 billion, driven by institutional interest.</p>
+    </div>
+    <div class="bottom-card">
+      <div class="bottom-card-img"></div>
+      <div class="story-category">Developer Tools</div>
+      <div class="bottom-card-title">The case for background jobs infrastructure that doesn't need monitoring</div>
+      <p class="bottom-card-excerpt">A growing number of teams are rethinking observability-first approaches in favor of systems designed to simply not fail.</p>
+    </div>
+    <div class="bottom-card">
+      <div class="bottom-card-img"></div>
+      <div class="story-category">East Africa</div>
+      <div class="bottom-card-title">Nairobi fintech corridor sees record startup formation in February</div>
+      <p class="bottom-card-excerpt">The Westlands tech corridor recorded 34 new fintech incorporations in February alone, a 60% increase from the same period last year.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="paper-footer">
+  <span class="footer-brand">The Daily Planet · Built with Glove × Station</span>
+  <span class="footer-powered">dterminal · March 2026</span>
+</div>
+
+</body>
+</html>
